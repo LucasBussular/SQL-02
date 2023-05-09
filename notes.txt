@@ -1,0 +1,155 @@
+My SQL - buscas avançadas
+
+AULA 02 ......................................................................................................................................................................................................................
+
+Toda vez que é criado um índice, o SQL cria automaticamente um índice.
+
+Como identificar com outro nome que não do campo original:
+	Select CPF as IDENTIFICADOR, NOME as CLIENTES Ffrom tabela_de_clientes >>> assim, uma tabela será gerada tendo as informações de CPF dentro da coluna IDENTIFICADOR. Desse modo, em tabelas com nomes de campos
+	pouco identificáveis, a consulta se torna mais fácil e legível.
+
+Consultas condicionais:
+	Select * from tab where X = A;	
+		Quando a condição for verdadeira será exibida, quando for falsa um erro será exibido
+	Select * from tab where X = A and Y = B;
+		Se uma delas for falsa, a expressão inteira será falsa
+	Select * from tab where X = A or Y = B;	
+		Se uma delas for falsa, a expressão inteira continua sendo verdadeira
+	Select * from tab where NOT (X = A or Y = B);
+		O NOT inverte o resultado, portanto se as condições forem positivas, o NOT torna a expressão em negativa
+	Select * from tab where X in (A, B);
+		in é o equivalente a X = A or X = B, uma ou outra
+	Select * from tab where X like '%Silva%';
+		like junto de uma string entre %% seleciona todos os nomes com 'Silva' no meio do nome
+	Select * from tab where X like '%Silva' >>>> caso seja escrito dessa forma, só encontrará nomes com 'Silva' no fim de nome
+
+AULA 03 ......................................................................................................................................................................................................................
+
+	Select DISTINCT * from tab;		
+		Seleciona todas as linhas da tabela que são diferentes, ou seja, caso haja linhas repetidas na tabela, pega apenas uma delas.
+	Select * from tab where X = A LIMIT 50;
+		Seleciona todos os itens da tabela, limitando a mostrar apenas os 50 primeiros	
+	Select * from tab where X = A LIMIT 2,5
+		Seleciona todos os itens da tabela, limitando a mostrar apenas 3 a partir da segunda linha
+
+Comando ORDER BY: ordena a exibição de uma consulta de acordo com o campo pedido
+	select * from Tabela ORDER BY campo
+		caso o campo seja varchat: ordena por ordem alfabética
+		caso o campo seja numeral: ordena por ontem crescente 
+	
+	Select * from Tabela ORDER BY campo1, campo2 
+		ordena campo1 e, depois, campo 2
+
+Agrupando resultados: 
+	Select Campo1, campo2 from Tabela GROUP BY Campo1
+		Junta tudo do campo 2 dentro do campo 1
+
+		Podemos usar:
+			SUM: soma
+			MAX: máximo
+			MIN: mínimo
+			AVG: média
+			COUNT: conta ocorrências 
+
+	select ESTADO, SUM(LIMITE_DE_CREDITO) AS limite_total FROM tabela_de_clientes GROUP BY ESTADO 
+					      Operações sempre precisam que eu modifique o nome por um Alias
+	
+HAVING: O having é um filtro aplicado sobre um select agrupado	
+	Ex: select ESTADO, SUM(LIMITE_DE_CREDITO) AS SOMA_LIMITE FROM tabela_de_clientes GROUP BY estado HAVING SUM(LIMITE_DE_CREDITO) > 900000 	
+													 Condição aplicada depois do group by
+
+CASE: fazemos um teste em um ou mais campos e, dependendo do resultado, teremos um ou outro valor:
+	Ex: Select X, 
+		CASE
+			WHEN Y>= 8 AND <= 10 THEN 'Otimo'
+			WHEN Y>= 7 AND < 8 THEN 'Bom'
+			WHEN Y>= 6 AND < 7 THEN 'Medio'
+		ELSE 'Ruim'
+		END
+		From tabela
+
+AULA 04 ......................................................................................................................................................................................................................
+	
+JOINS: permite juntar uma ou mais tabelas através de um campo comum. Existem vários tipos de JOIN:
+
+	select A.NOME, B.HOBBY from TABELA_ESQUERDA A INNER JOIN TABELA_DIREITA B ON A.IDENTIFICADOR = B.IDENTIFICADOR
+					              Traz os elementos em comum das duas tabelas
+	select A.NOME, B.HOBBY from TABELA_ESQUERDA A LEFT JOIN TABELA_DIREITA B ON A.IDENTIFICADOR = B.IDENTIFICADOR
+						      Traz todos os elementos da tabela da esquerda (primeira tabela) 
+	select A.NOME, B.HOBBY from TABELA_ESQUERDA A RIGHT JOIN TABELA_DIREITA B ON A.IDENTIFICADOR = B.IDENTIFICADOR
+						      Traz todos os elementos da tabela da direita (segunda tabela)
+	select A.NOME, B.HOBBY from TABELA_ESQUERDA A FULL JOIN TABELA_DIREITA B ON A.IDENTIFICADOR = B.IDENTIFICADOR
+						      Traz todos os elementos de todas as tabelas
+	select A.NOME, B.HOBBY from TABELA_ESQUERDA A CROSS JOIN TABELA_DIREITA B ON A.IDENTIFICADOR = B.IDENTIFICADOR
+						      Traz todos os produtos cartesianos dos elementos de todas as tabelas
+	
+EX: 				    // conta a quantidade de ocorrências de algo
+	Select A.MATRICULA, A.NOME, COUNT(*) FROM
+	tabela_de_vendedores A 
+	INNER JOIN notas_fiscais B
+	ON A.MATRICULA = B.MATRICULA
+	GROUP BY A.MATRICULA, A.NOME;
+
+
+CROSS JOIN & FULL JOIN:
+	
+	Para usar o full join no SQL basta usar o right join e o left join ao mesmo tempo usando o comando de juntar duas consultas
+
+JUNTANDO CONSULTAS: usamos o comando UNION
+
+	Consulta 1 
+	union
+	Consulta 2;
+	// com union apenas os itens repetidos aparecem apenas uma vez	
+
+	Consulta 1 
+	union all
+	Consulta 2;
+	// com union all os itens repetidos aparecem repetidos
+
+
+Subconsultas:
+	Select X, Y FROM TAB1 WHERE Y IN (SELECT Y FROM TAB2)	
+	// seleciona todos os itens da tabela 1 que compratilham o valor de Y com os itens da tabela 2
+
+VIEW: é uma tabela lógica resultado de uma consulta salva.
+	Para criar uma view no SQL:
+		CREATE VIEW nome_da_view AS
+			    // é boa prática começar o nome da View como VW_NOME_DA_TABELA
+		SELECT coluna1, coluna2, ...
+		FROM nome_da_tabela
+		WHERE condição;
+
+AULA 05 ......................................................................................................................................................................................................................
+
+FUNÇÕES: Buscar as funções em *dev.mysql.com > mysql reference manual > functions and operators* e w3schools.com
+	
+	FUNÇÕES ESCALARES > aplicadas em strings
+		ex: select CONCAT ('STRING1', 'STRING2')
+		    select TRIM ('        STRING      ') > tira os espaços vazios dentro de uma string
+		    select LOWER ('STRING') > coloca a string inteira em minúsculo
+		    select SUBSTRING ('STRING), 5,3) > a partir do quinto caracter, pega 3 
+
+	FUNÇÕES DATA > aplicadas em data	
+		ex: select ADDDATE("2017-05-15", INTERVAL 1 YEAR) > adiciona um ano à data
+		    select ADDTIME > adiciona tempo em horas a uma data
+		    select CURRENT_TIMESTAMP() > traz a data e hora atuais
+	 	    select DATEDIFF('DATA FINAL', 'DATA INICIAL') > traz a diferença de datas em dias
+		
+	FUNÇÕES MATEMÁTICAS > realiza contas matemáticas
+		ex: select CEILING(numero) > arredonda o número para cima
+		    select FLOOR(numero) > arredonda o número para baixo
+
+CONVERSÃO DE DADOS: 
+	Conversão de datas em string: DATE_FORMAT(CURRENT_TIMESTAMP(), '%Y') > transforma a informação data do ano em uma string com 4 dígitos
+				      DATE_FORMAT(CURRENT_TIMESTAMP(), '%y/%m') > transforma a informação data do ano em uma string com 2 dígitos e mês
+
+ 
+
+
+
+
+
+
+
+
